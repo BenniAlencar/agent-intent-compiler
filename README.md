@@ -18,7 +18,7 @@
 
 <br/>
 
-<img src="assets/demo.svg" alt="agent-intent-compiler Deterministic Intent & DAG Execution Demo" width="100%"/>
+<img src="assets/demo.gif" alt="agent-intent-compiler Deterministic Intent & DAG Execution Demo" width="100%"/>
 
 </div>
 
