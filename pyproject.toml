@@ -58,3 +58,7 @@ Issues = "https://github.com/BenniAlencar/agent-intent-compiler/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/agent_intent_compiler"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

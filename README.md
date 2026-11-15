@@ -4,7 +4,7 @@
 
 <br/>
 
-[![Tests](https://img.shields.io/badge/Tests-10%20Passed-00C853?style=for-the-badge&logo=pytest&logoColor=white)](#-benchmark-comparison)
+[![Tests](https://img.shields.io/badge/Tests-14%20Passed-00C853?style=for-the-badge&logo=pytest&logoColor=white)](#-benchmark-comparison)
 [![Python](https://img.shields.io/badge/Python-3.9+-7000FF?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Dependencies](https://img.shields.io/badge/Dependencies-Zero%20(Stdlib)-00C853?style=for-the-badge)](#-installation)
 [![MCP Native](https://img.shields.io/badge/MCP-JSON--RPC%202.0-8a2be2?style=for-the-badge)](#-2-export-directly-to-model-context-protocol-mcp)
@@ -46,37 +46,32 @@ This creates four critical failure modes in production:
 ## 🏗️ Architecture
 
 ```text
-┌────────────────────────────────────────────────────────────────────────┐
-│                        USER NATURAL LANGUAGE PROMPT                    │
-└───────────────────────────────────┬────────────────────────────────────┘
-                                    │ (<0.2ms)
-                                    ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│                      PROMPT SANITIZER & ENTROPY SHIELD                 │
-│  - Traverses syntax & filters zero-width unicode obfuscation           │
-│  - Evaluates Shannon entropy for base64/hex hidden payload injection   │
-└───────────────────────────────────┬────────────────────────────────────┘
-                                    │ Clean Prompt
-                                    ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│                     TYPED INTENT & SLOT COMPILER                       │
-│  - Classifies intent: Query | Mutation | Research | Evaluation         │
-│  - Extracts validated parameters into strict typed node schemas        │
-└───────────────────────────────────┬────────────────────────────────────┘
-                                    │
-                                    ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│                     KAHN'S ALGORITHM DAG PLANNER                       │
-│  - Detects and halts cyclic dependencies                               │
-│  - Groups independent tool nodes into parallel execution stages        │
-│  - Computes SHA-256 Merkle Intent Receipt                              │
-└───────────────────────────────────┬────────────────────────────────────┘
-                                    │
-                                    ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│                   MODEL CONTEXT PROTOCOL (MCP) ADAPTER                 │
-│         Emits validated JSON-RPC 2.0 "tools/call" requests             │
-└────────────────────────────────────────────────────────────────────────┘
+  User Prompts / Agent Frameworks / MCP Clients
+         │
+         ├──► Python API  IntentCompiler.compile(prompt)
+         └──► CLI / JSON  agent-intent-compiler "<prompt>"
+                       │
+                       ▼
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │                       agent-intent-compiler                         │
+  │                                                                     │
+  │  ┌───────────────────┐  ┌───────────────────┐  ┌─────────────────┐  │
+  │  │ Prompt Sanitizer  │  │  Typed Intent &   │  │ Kahn's DAG      │  │
+  │  │ • Zero-Width      │─►│  Slot Compiler    │─►│ Planner         │  │
+  │  │   Strip           │  │  • Query/Mutation │  │ • Cycle Guard   │  │
+  │  │ • Entropy Shield  │  │  • Research/Eval  │  │ • Parallel      │  │
+  │  └───────────────────┘  └───────────────────┘  │   Stages        │  │
+  │                                                └─────────────────┘  │
+  │  ┌───────────────────┐  ┌───────────────────┐  ┌─────────────────┐  │
+  │  │ SHA-256 Merkle    │  │  MCP JSON-RPC 2.0 │  │ Live Telemetry  │  │
+  │  │ Execution Seal    │  │  Adapter          │  │ & Doctor /      │  │
+  │  │ • Non-Repudiation │  │  • tools/call     │  │ Bench Matrix    │  │
+  │  └───────────────────┘  └───────────────────┘  └─────────────────┘  │
+  └─────────────────────────────────────────────────────────────────────┘
+         │                                         │
+         ▼                                         ▼
+   Cryptographic ExecutionPlan               MCP Tool Runtime
+   (Staged Nodes + Merkle Root)              (JSON-RPC 2.0 Payloads)
 ```
 
 ### Key Capabilities
@@ -141,8 +136,48 @@ agent-intent-compiler "Deep research on LLM inference optimizations on edge hard
 ### Running the Test Suite
 
 ```bash
-PYTHONPATH=src pytest -v
-# 10 passed (test_compiler.py, test_dag.py, test_mcp_adapter.py, test_sanitizer.py)
+pytest -v
+# 14 passed (test_compiler.py, test_dag.py, test_mcp_adapter.py, test_sanitizer.py, test_subpackages.py, test_telemetry.py, test_tools.py)
+```
+
+---
+
+## 📁 Project Structure
+
+```text
+agent-intent-compiler/
+├── src/
+│   └── agent_intent_compiler/
+│       ├── __init__.py               # Public package exports
+│       ├── cli.py                    # CLI entrypoint
+│       ├── compiler.py               # Backwards-compatible shim -> core.compiler
+│       ├── dag.py                    # Backwards-compatible shim -> core.dag
+│       ├── mcp_adapter.py            # Backwards-compatible shim -> serve.mcp_adapter
+│       ├── models.py                 # Backwards-compatible shim -> core.models
+│       ├── sanitizer.py              # Backwards-compatible shim -> core.sanitizer
+│       ├── core/
+│       │   ├── __init__.py           # Core compilation subpackage exports
+│       │   ├── compiler.py           # Deterministic IntentCompiler orchestrator
+│       │   ├── dag.py                # Kahn's algorithm topological DAG planner
+│       │   ├── models.py             # Typed ExecutionNode, ExecutionPlan & Merkle seal
+│       │   └── sanitizer.py          # Zero-width, regex & Shannon entropy shield
+│       ├── serve/
+│       │   ├── __init__.py           # Serving & telemetry subpackage exports
+│       │   ├── mcp_adapter.py        # MCP JSON-RPC 2.0 tools/call emitter
+│       │   └── telemetry.py          # P50/P90/P99 latency & intent distribution
+│       └── tools/
+│           ├── __init__.py           # Diagnostics & benchmark subpackage exports
+│           ├── bench_matrix.py       # Multi-category compilation latency matrix
+│           └── doctor.py             # Runtime health & injection shield probe
+├── docs/
+│   └── ARCHITECTURE.md               # Detailed compiler & DAG architecture spec
+├── examples/
+│   ├── mcp_pipeline_export.py        # Compile + MCP JSON-RPC export + telemetry
+│   └── quickstart_compile.py         # Minimal multi-step DAG compilation example
+├── scripts/
+│   ├── benchmark_latency.py          # Sub-millisecond compilation matrix runner
+│   └── gate_injection_shield.py      # Adversarial prompt injection gate suite
+└── tests/                            # Full pytest suite (14 tests)
 ```
 
 ---
