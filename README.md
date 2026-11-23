@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0D0D0D,50:1a1a2e,100:7000FF&height=200&section=header&text=agent-intent-compiler&fontSize=50&fontColor=ffffff&fontAlignY=38&desc=Deterministic%20Intent%20Compiler%20%26%20Typed%20DAG%20Execution%20Planner&descAlignY=58&descSize=16&animation=fadeIn" width="100%"/>
+<img src="assets/banner_header.png" width="100%"/>
 
 <br/>
 
@@ -241,7 +241,7 @@ Need deterministic intent compilation, autonomous multi-agent swarm orchestratio
 
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:7000FF,50:1a1a2e,100:0D0D0D&height=120&section=footer" width="100%"/>
+<img src="assets/banner_footer.png" width="100%"/>
 
 **agent-intent-compiler** — *Deterministic Intent Compiler & Typed DAG Execution Planner* • [benni-os.net](https://benni-os.net) • `MIT License`
 
